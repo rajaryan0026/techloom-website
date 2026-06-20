@@ -8,9 +8,11 @@ If you created the service manually, set this in **techloom-api → Settings →
 |-------|-------|
 | **Root Directory** | `backend` |
 | **Build Command** | `npm install && npm run build` |
-| **Start Command** | `npx prisma db push && npm start` |
+| **Start Command** | `npx prisma db push && npm run db:seed && npm start` |
 
 Save, then **Manual Deploy → Deploy latest commit**.
+
+> **Free tier has no Shell.** The start command above auto-creates the admin user and seeds data on every deploy (safe — uses upserts).
 
 ---
 
@@ -47,15 +49,18 @@ Click **Save Changes** → service redeploys.
 
 ---
 
-## Step 3 — Seed the database (once)
+## Step 3 — Admin login (auto-seeded on start)
 
-**techloom-api** → **Shell** tab:
+Set on **techloom-api** → **Environment**:
 
-```bash
-npm run db:seed
-```
+| Variable | Value |
+|----------|-------|
+| `ADMIN_EMAIL` | `admin@techloom.com` |
+| `ADMIN_PASSWORD` | Your chosen password |
 
-You should see: `Seed complete. Admin: admin@techloom.com`
+Redeploy — the **Start Command** runs `db:seed` automatically and creates/resets the admin user.
+
+**Login:** `admin@techloom.com` + your `ADMIN_PASSWORD` (default `Admin@Techloom123` if unset).
 
 ---
 

@@ -126,8 +126,10 @@ async function main() {
     { name: 'Elena Rodriguez', company: 'FinEdge', role: 'CTO', quote: 'The SaaS platform they built handles 50K users flawlessly. True enterprise quality.', rating: 5, featured: true },
   ];
 
-  for (const t of testimonials) {
-    await prisma.testimonial.create({ data: t });
+  if ((await prisma.testimonial.count()) === 0) {
+    for (const t of testimonials) {
+      await prisma.testimonial.create({ data: t });
+    }
   }
 
   const portfolio = [
@@ -178,8 +180,10 @@ async function main() {
     { name: 'Mia Tanaka', role: 'Lead Designer', bio: 'Award-winning designer crafting premium digital experiences.', order: 3 },
   ];
 
-  for (const member of team) {
-    await prisma.teamMember.create({ data: member });
+  if ((await prisma.teamMember.count()) === 0) {
+    for (const member of team) {
+      await prisma.teamMember.create({ data: member });
+    }
   }
 
   const categories = ['AI Insights', 'Web Development', 'Marketing', 'Automation'];
