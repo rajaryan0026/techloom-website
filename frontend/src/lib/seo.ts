@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://techloom.com';
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.techloom.live';
 
 export const siteConfig = {
   name: 'Techloom',
