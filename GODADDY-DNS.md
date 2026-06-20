@@ -21,9 +21,13 @@ Go to [GoDaddy Domain Portfolio](https://dcc.godaddy.com/) → **techloom.live**
 
 Save. Propagation: 10 minutes – 48 hours (usually under 1 hour).
 
-## 3. Vercel environment variables
+## 3. Vercel — Import .env
 
-Project → **Settings → Environment Variables**:
+When importing the GitHub repo on Vercel:
+
+1. Set **Root Directory** → `frontend`
+2. Click **Environment Variables** → **Import .env**
+3. Upload or paste from `frontend/vercel.env.import`:
 
 ```
 NEXT_PUBLIC_SITE_URL=https://www.techloom.live
@@ -34,18 +38,19 @@ NEXT_PUBLIC_PHONE=+919709991060
 NEXT_PUBLIC_INSTAGRAM=techloom00
 ```
 
-Redeploy after saving.
+4. Deploy
 
-## 4. Render (API) environment variables
+> After Render API is live, update `NEXT_PUBLIC_API_URL` if your API URL is different.
 
-On **techloom-api** service:
+Redeploy after any env change.
 
-```
-FRONTEND_URL=https://www.techloom.live
-CORS_ORIGIN=https://www.techloom.live
-```
+## 4. Render — Import .env (API)
 
-(Also set SMTP and `ADMIN_PASSWORD` for production.)
+On **techloom-api** → **Environment** → **Import from .env**:
+
+Use `backend/render.env.import` — **edit `SMTP_PASS` and `ADMIN_PASSWORD` first**, then import.
+
+`DATABASE_URL`, `JWT_SECRET`, and `JWT_REFRESH_SECRET` are created automatically by `render.yaml` — do not overwrite those.
 
 ## 5. Optional: API subdomain
 
