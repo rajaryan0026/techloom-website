@@ -58,10 +58,14 @@ Use **Resend** instead (HTTPS API, works on Render):
 2. **Domains** → add `techloom.live` → add the DNS records Resend shows in GoDaddy.
 3. Wait until the domain shows **Verified**.
 4. Set on Render:
-   - `RESEND_API_KEY` = your key
-   - `EMAIL_FROM` = `Techloom <notifications@techloom.live>`
-   - `CONTACT_EMAIL` = your inbox (e.g. `rajaryan2611@gmail.com`)
+   - `RESEND_API_KEY` = your Resend API key
+   - `EMAIL_FROM` = `Techloom <onboarding@resend.dev>` (until domain is verified)
+   - `CONTACT_EMAIL` = `rajaryan2611@gmail.com`
 5. Remove `SMTP_USER` / `SMTP_PASS` from Render if present (Resend takes priority when `RESEND_API_KEY` is set).
+
+**Interim (domain not verified yet):** `onboarding@resend.dev` only delivers to your Resend account email — contact alerts to `rajaryan2611@gmail.com` work; visitor confirmation emails do not.
+
+**After domain verified:** change `EMAIL_FROM` to `Techloom <notifications@techloom.live>` and redeploy — then both admin + visitor emails work.
 
 After deploy, check `https://techloom-api.onrender.com/health` — expect `"email": { "configured": true, "provider": "resend", "ok": true }`.
 

@@ -43,7 +43,8 @@ function getTransporter() {
 function getFromAddress() {
   if (process.env.EMAIL_FROM) return process.env.EMAIL_FROM;
   if (getProvider() === 'resend') {
-    return 'Techloom <notifications@techloom.live>';
+    // Use onboarding sender until techloom.live is verified on Resend.
+    return 'Techloom <onboarding@resend.dev>';
   }
   return `Techloom <${process.env.SMTP_USER}>`;
 }
@@ -65,6 +66,11 @@ async function verifyResendConnection() {
     });
 
     if (res.status === 401 || res.status === 403) {
+      const payload = await res.json().catch(() => ({})) as { message?: string; name?: string };
+      // Send-only keys cannot list domains but can still send mail.
+      if (payload.name === 'restricted_api_key') {
+        return { ok: true, reason: null, sendOnlyKey: true };
+      }
       return { ok: false, reason: 'Invalid RESEND_API_KEY' };
     }
     if (!res.ok) {
