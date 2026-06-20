@@ -39,12 +39,12 @@ export function ContactForm({ services = [] }: { services?: Service[] }) {
     } catch (err) {
       if (axios.isAxiosError(err)) {
         if (!err.response) {
-          setError('Cannot reach server. Run START-TECHLOOM.bat and keep both windows open.');
+          setError('Cannot reach our server. Please try again in a moment or contact us on WhatsApp.');
         } else if (err.response.data?.errors) {
           const msgs = Object.values(err.response.data.errors).flat().filter(Boolean);
           setError(msgs.join(', ') || 'Please check the form fields and try again.');
         } else if (err.response.status >= 500) {
-          setError('Server error. Make sure START-TECHLOOM.bat is running, then try again.');
+          setError('Server error. Please try again shortly or message us on WhatsApp.');
         } else {
           setError(err.response.data?.message || 'Failed to send message. Please try again.');
         }
@@ -66,7 +66,7 @@ export function ContactForm({ services = [] }: { services?: Service[] }) {
         <p className="mt-3 text-surface-gray">
           {emailSent
             ? "We've emailed you a confirmation and our team will reply within 24 hours."
-            : 'Your message was saved. Our team will follow up soon.'}
+            : 'Your message was received and saved. Our team will follow up within 24 hours. You can also reach us on WhatsApp for a faster reply.'}
         </p>
       </div>
     );
