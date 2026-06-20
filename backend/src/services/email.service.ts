@@ -1,9 +1,20 @@
 import nodemailer from 'nodemailer';
 import type { Transporter } from 'nodemailer';
+import { Resend } from 'resend';
 
 type EmailProvider = 'resend' | 'smtp';
 
 let transporter: Transporter | null = null;
+let resendClient: Resend | null = null;
+
+function getResend() {
+  const apiKey = process.env.RESEND_API_KEY?.trim();
+  if (!apiKey) return null;
+  if (!resendClient) {
+    resendClient = new Resend(apiKey);
+  }
+  return resendClient;
+}
 
 function getProvider(): EmailProvider | null {
   if (process.env.RESEND_API_KEY?.trim()) return 'resend';
@@ -58,23 +69,18 @@ export function isEmailConfigured() {
 }
 
 async function verifyResendConnection() {
-  const apiKey = process.env.RESEND_API_KEY!.trim();
-  try {
-    const res = await fetch('https://api.resend.com/domains', {
-      headers: { Authorization: `Bearer ${apiKey}` },
-      signal: AbortSignal.timeout(10_000),
-    });
+  const resend = getResend();
+  if (!resend) return { ok: false, reason: 'RESEND_API_KEY not set' };
 
-    if (res.status === 401 || res.status === 403) {
-      const payload = await res.json().catch(() => ({})) as { message?: string; name?: string };
+  try {
+    const { error } = await resend.domains.list();
+
+    if (error) {
       // Send-only keys cannot list domains but can still send mail.
-      if (payload.name === 'restricted_api_key') {
+      if (error.name === 'restricted_api_key') {
         return { ok: true, reason: null, sendOnlyKey: true };
       }
-      return { ok: false, reason: 'Invalid RESEND_API_KEY' };
-    }
-    if (!res.ok) {
-      return { ok: false, reason: `Resend API error (${res.status})` };
+      return { ok: false, reason: error.message || 'Invalid RESEND_API_KEY' };
     }
 
     return { ok: true, reason: null };
@@ -113,27 +119,19 @@ async function sendViaResend(
   html: string,
   options?: { replyTo?: string }
 ) {
-  const body: Record<string, unknown> = {
+  const resend = getResend();
+  if (!resend) throw new Error('RESEND_API_KEY not set');
+
+  const { error } = await resend.emails.send({
     from: getFromAddress(),
-    to: [to],
+    to,
     subject,
     html,
-  };
-  if (options?.replyTo) body.reply_to = options.replyTo;
-
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${process.env.RESEND_API_KEY!.trim()}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-    signal: AbortSignal.timeout(15_000),
+    replyTo: options?.replyTo,
   });
 
-  if (!res.ok) {
-    const payload = await res.json().catch(() => ({})) as { message?: string };
-    throw new Error(payload.message || `Resend API error (${res.status})`);
+  if (error) {
+    throw new Error(error.message || 'Resend send failed');
   }
 }
 

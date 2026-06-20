@@ -12,7 +12,8 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
     "db:reset-admin": "tsx prisma/seed.ts",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "test:resend": "tsx scripts/test-resend.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.750.0",
@@ -40,6 +41,7 @@
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.10.0",
     "prisma": "^6.4.1",
+    "resend": "^4.5.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "tsx": "^4.19.3",
