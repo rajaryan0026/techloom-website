@@ -33,6 +33,9 @@ When importing the GitHub repo on Vercel:
 NEXT_PUBLIC_SITE_URL=https://www.techloom.live
 NEXT_PUBLIC_API_URL=https://techloom-api.onrender.com/api
 INTERNAL_API_URL=https://techloom-api.onrender.com/api
+```
+
+> Use the **direct Render URL** (not `/api`). Vercel proxy can timeout when Render free tier wakes from sleep.
 NEXT_PUBLIC_WHATSAPP_NUMBER=919709991060
 NEXT_PUBLIC_PHONE=+919709991060
 NEXT_PUBLIC_INSTAGRAM=techloom00
