@@ -11,7 +11,7 @@ import authRoutes from './routes/auth.routes';
 import publicRoutes from './routes/public.routes';
 import userRoutes from './routes/user.routes';
 import adminRoutes from './routes/admin.routes';
-import { isEmailConfigured, verifyEmailConnection } from './services/email.service';
+import { getEmailProvider, isEmailConfigured, verifyEmailConnection } from './services/email.service';
 
 const app = express();
 
@@ -63,11 +63,14 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 app.get('/health', async (_req, res) => {
   const configured = isEmailConfigured();
-  const email = configured ? await verifyEmailConnection() : { ok: false, reason: 'SMTP not configured' };
+  const provider = getEmailProvider();
+  const email = configured
+    ? await verifyEmailConnection()
+    : { ok: false, reason: 'Set RESEND_API_KEY or SMTP credentials', provider: null };
   res.json({
     status: 'ok',
     service: 'techloom-api',
-    email: { configured, ...email },
+    email: { configured, provider, ...email },
   });
 });
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));

@@ -1,7 +1,15 @@
 import nodemailer from 'nodemailer';
 import type { Transporter } from 'nodemailer';
 
+type EmailProvider = 'resend' | 'smtp';
+
 let transporter: Transporter | null = null;
+
+function getProvider(): EmailProvider | null {
+  if (process.env.RESEND_API_KEY?.trim()) return 'resend';
+  if (process.env.SMTP_USER && process.env.SMTP_PASS) return 'smtp';
+  return null;
+}
 
 function createTransporter() {
   if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
@@ -19,6 +27,9 @@ function createTransporter() {
       pass: process.env.SMTP_PASS!.replace(/\s/g, ''),
     },
     tls: { minVersion: 'TLSv1.2' },
+    connectionTimeout: 10_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 15_000,
   });
 }
 
@@ -29,20 +40,113 @@ function getTransporter() {
   return transporter;
 }
 
+function getFromAddress() {
+  if (process.env.EMAIL_FROM) return process.env.EMAIL_FROM;
+  if (getProvider() === 'resend') {
+    return 'Techloom <notifications@techloom.live>';
+  }
+  return `Techloom <${process.env.SMTP_USER}>`;
+}
+
+export function getEmailProvider() {
+  return getProvider();
+}
+
 export function isEmailConfigured() {
-  return Boolean(getTransporter());
+  return getProvider() !== null;
+}
+
+async function verifyResendConnection() {
+  const apiKey = process.env.RESEND_API_KEY!.trim();
+  try {
+    const res = await fetch('https://api.resend.com/domains', {
+      headers: { Authorization: `Bearer ${apiKey}` },
+      signal: AbortSignal.timeout(10_000),
+    });
+
+    if (res.status === 401 || res.status === 403) {
+      return { ok: false, reason: 'Invalid RESEND_API_KEY' };
+    }
+    if (!res.ok) {
+      return { ok: false, reason: `Resend API error (${res.status})` };
+    }
+
+    return { ok: true, reason: null };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown Resend error';
+    return { ok: false, reason: message };
+  }
 }
 
 export async function verifyEmailConnection() {
+  const provider = getProvider();
+  if (!provider) {
+    return { ok: false, reason: 'Set RESEND_API_KEY (production) or SMTP_USER + SMTP_PASS (local)' };
+  }
+
+  if (provider === 'resend') {
+    const result = await verifyResendConnection();
+    return { ...result, provider };
+  }
+
   const t = getTransporter();
-  if (!t) return { ok: false, reason: 'SMTP_USER and SMTP_PASS not set in backend/.env' };
+  if (!t) return { ok: false, reason: 'SMTP_USER and SMTP_PASS not set', provider };
+
   try {
     await t.verify();
-    return { ok: true, reason: null };
+    return { ok: true, reason: null, provider };
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown SMTP error';
-    return { ok: false, reason: message };
+    return { ok: false, reason: message, provider };
   }
+}
+
+async function sendViaResend(
+  to: string,
+  subject: string,
+  html: string,
+  options?: { replyTo?: string }
+) {
+  const body: Record<string, unknown> = {
+    from: getFromAddress(),
+    to: [to],
+    subject,
+    html,
+  };
+  if (options?.replyTo) body.reply_to = options.replyTo;
+
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.RESEND_API_KEY!.trim()}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(15_000),
+  });
+
+  if (!res.ok) {
+    const payload = await res.json().catch(() => ({})) as { message?: string };
+    throw new Error(payload.message || `Resend API error (${res.status})`);
+  }
+}
+
+async function sendViaSmtp(
+  to: string,
+  subject: string,
+  html: string,
+  options?: { replyTo?: string }
+) {
+  const t = getTransporter();
+  if (!t) throw new Error('SMTP not configured');
+
+  await t.sendMail({
+    from: getFromAddress(),
+    to,
+    replyTo: options?.replyTo,
+    subject,
+    html,
+  });
 }
 
 export async function sendEmail(
@@ -51,26 +155,24 @@ export async function sendEmail(
   html: string,
   options?: { replyTo?: string }
 ) {
-  const t = getTransporter();
-  if (!t) {
-    console.warn('[Email] SMTP not configured. Run setup-email.ps1 or set SMTP_USER and SMTP_PASS in backend/.env');
+  const provider = getProvider();
+  if (!provider) {
+    console.warn('[Email] Not configured. Set RESEND_API_KEY or SMTP_USER + SMTP_PASS.');
     console.log(`[Email Mock] To: ${to} | Subject: ${subject}`);
-    return { sent: false, mock: true, error: 'SMTP not configured' };
+    return { sent: false, mock: true, error: 'Email not configured' };
   }
 
   try {
-    await t.sendMail({
-      from: process.env.EMAIL_FROM || `Techloom <${process.env.SMTP_USER}>`,
-      to,
-      replyTo: options?.replyTo,
-      subject,
-      html,
-    });
-    return { sent: true, mock: false };
+    if (provider === 'resend') {
+      await sendViaResend(to, subject, html, options);
+    } else {
+      await sendViaSmtp(to, subject, html, options);
+    }
+    return { sent: true, mock: false, provider };
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to send email';
-    console.error(`[Email] Failed to send to ${to}:`, message);
-    return { sent: false, mock: false, error: message };
+    console.error(`[Email] Failed to send to ${to} via ${provider}:`, message);
+    return { sent: false, mock: false, error: message, provider };
   }
 }
 

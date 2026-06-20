@@ -39,13 +39,33 @@ Paste from `backend/render.env.import` and **edit these**:
 
 | Variable | Value |
 |----------|-------|
-| `SMTP_PASS` | Your Gmail app password |
+| `RESEND_API_KEY` | API key from [resend.com](https://resend.com) |
+| `CONTACT_EMAIL` | `rajaryan2611@gmail.com` (where contact form alerts go) |
 | `ADMIN_PASSWORD` | Strong password for admin login |
 | `API_PUBLIC_URL` | `https://techloom-api.onrender.com` (your actual Render URL) |
 
 Click **Save Changes** → service redeploys.
 
 > `DATABASE_URL`, `JWT_SECRET`, `JWT_REFRESH_SECRET` are auto-set by Blueprint — don't delete them.
+
+### Email on Render (Resend — required)
+
+Gmail SMTP (`smtp.gmail.com:587`) **times out on Render** — cloud hosts often block outbound SMTP.
+
+Use **Resend** instead (HTTPS API, works on Render):
+
+1. Sign up at [resend.com](https://resend.com) → **API Keys** → create key → paste as `RESEND_API_KEY` on Render.
+2. **Domains** → add `techloom.live` → add the DNS records Resend shows in GoDaddy.
+3. Wait until the domain shows **Verified**.
+4. Set on Render:
+   - `RESEND_API_KEY` = your key
+   - `EMAIL_FROM` = `Techloom <notifications@techloom.live>`
+   - `CONTACT_EMAIL` = your inbox (e.g. `rajaryan2611@gmail.com`)
+5. Remove `SMTP_USER` / `SMTP_PASS` from Render if present (Resend takes priority when `RESEND_API_KEY` is set).
+
+After deploy, check `https://techloom-api.onrender.com/health` — expect `"email": { "configured": true, "provider": "resend", "ok": true }`.
+
+Local dev can still use Gmail via `.\setup-email.ps1` (no `RESEND_API_KEY` in `backend/.env`).
 
 ---
 

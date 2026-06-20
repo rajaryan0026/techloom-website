@@ -37,16 +37,10 @@ services:
         value: https://www.techloom.live,https://techloom.live
       - key: API_PUBLIC_URL
         sync: false
-      - key: SMTP_HOST
-        value: smtp.gmail.com
-      - key: SMTP_PORT
-        value: "587"
-      - key: SMTP_USER
-        sync: false
-      - key: SMTP_PASS
+      - key: RESEND_API_KEY
         sync: false
       - key: EMAIL_FROM
-        sync: false
+        value: Techloom <notifications@techloom.live>
       - key: CONTACT_EMAIL
         sync: false
       - key: ADMIN_EMAIL
