@@ -192,9 +192,15 @@ export async function submitContact(req: AuthRequest, res: Response, next: NextF
   try {
     const { name, email, phone, company, serviceId, message } = req.body;
 
-    const service = serviceId
-      ? await prisma.service.findUnique({ where: { id: serviceId } })
-      : null;
+    let resolvedServiceId: string | null = null;
+    let serviceName: string | undefined;
+    if (serviceId && typeof serviceId === 'string') {
+      const service = await prisma.service.findUnique({ where: { id: serviceId } });
+      if (service) {
+        resolvedServiceId = service.id;
+        serviceName = service.name;
+      }
+    }
 
     const lead = await prisma.lead.create({
       data: {
@@ -203,7 +209,7 @@ export async function submitContact(req: AuthRequest, res: Response, next: NextF
         phone: phone || null,
         company: company || null,
         message,
-        serviceId: service?.id ?? null,
+        serviceId: resolvedServiceId,
         source: 'contact',
         status: LeadStatus.NEW,
       },
@@ -217,7 +223,7 @@ export async function submitContact(req: AuthRequest, res: Response, next: NextF
         phone,
         company,
         message,
-        service: service?.name,
+        service: serviceName,
       });
     } catch (err) {
       console.error('[Contact] Email delivery failed:', err);
@@ -225,7 +231,7 @@ export async function submitContact(req: AuthRequest, res: Response, next: NextF
 
     try {
       await sendWhatsAppNotification(
-        `New Techloom contact from ${name} (${email}). Service: ${service?.name || 'General'}. Message: ${message.slice(0, 100)}`
+        `New Techloom contact from ${name} (${email}). Message: ${message.slice(0, 100)}`
       );
     } catch {
       // WhatsApp is optional

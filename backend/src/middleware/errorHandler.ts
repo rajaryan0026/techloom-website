@@ -26,7 +26,15 @@ export function errorHandler(
     });
   }
 
-  console.error(err);
+  if (err.message?.includes('CORS')) {
+    return res.status(403).json({
+      success: false,
+      message: 'Request blocked by CORS policy',
+      code: 'CORS_ERROR',
+    });
+  }
+
+  console.error('[Error]', err);
   return res.status(500).json({
     success: false,
     message: 'Internal server error',

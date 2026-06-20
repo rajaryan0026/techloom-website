@@ -23,14 +23,14 @@ export function ContactForm({ services = [] }: { services?: Service[] }) {
     setLoading(true);
     setError('');
 
-    const payload = {
+    const payload: Record<string, string> = {
       name: form.name.trim(),
       email: form.email.trim(),
-      phone: form.phone.trim() || undefined,
-      company: form.company.trim() || undefined,
-      serviceId: form.serviceId || undefined,
       message: form.message.trim(),
     };
+    if (form.phone.trim()) payload.phone = form.phone.trim();
+    if (form.company.trim()) payload.company = form.company.trim();
+    if (form.serviceId) payload.serviceId = form.serviceId;
 
     try {
       const { data } = await api.post('/contact', payload);
