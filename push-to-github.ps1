@@ -3,7 +3,7 @@
 # Optional: .\push-to-github.ps1 -GitHubUser "yourusername" -GitHubToken "ghp_xxx"
 
 param(
-    [string]$GitHubUser = "",
+    [string]$GitHubUser = "rajaryan0026",
     [string]$GitHubToken = $env:GITHUB_TOKEN,
     [string]$RepoName = "techloom-website"
 )
