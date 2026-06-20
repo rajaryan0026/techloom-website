@@ -1,0 +1,433 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  CLIENT
+  EDITOR
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  CONVERTED
+}
+
+enum BlogStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+}
+
+enum ProjectStatus {
+  PENDING
+  IN_PROGRESS
+  REVIEW
+  COMPLETED
+  ON_HOLD
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum PortfolioCategory {
+  WEBSITE
+  AI
+  MARKETING
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  DOCUMENT
+}
+
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  PROJECT
+  BOOKING
+  SUPPORT
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  name          String
+  phone         String?
+  company       String?
+  avatar        String?
+  emailVerified Boolean   @default(false)
+  role          UserRole  @default(CLIENT)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  refreshTokens   RefreshToken[]
+  blogs           Blog[]
+  comments        Comment[]
+  projects        Project[]        @relation("ClientProjects")
+  bookings        Booking[]
+  savedBlogs      SavedBlog[]
+  notifications   Notification[]
+  supportTickets  SupportTicket[]
+  ticketMessages  TicketMessage[]
+  media           Media[]
+  auditLogs       AuditLog[]
+  emailTokens     EmailToken[]
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model EmailToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  type      String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  blogs     Blog[]
+}
+
+model Tag {
+  id    String    @id @default(cuid())
+  name  String
+  slug  String    @unique
+  blogs BlogTag[]
+}
+
+model Blog {
+  id            String     @id @default(cuid())
+  title         String
+  slug          String     @unique
+  excerpt       String?
+  content       Json
+  featuredImage String?
+  status        BlogStatus @default(DRAFT)
+  publishedAt   DateTime?
+  scheduledAt   DateTime?
+  readingTime   Int        @default(5)
+  viewCount     Int        @default(0)
+  seoTitle      String?
+  seoDescription String?
+  authorId      String
+  categoryId    String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  author     User        @relation(fields: [authorId], references: [id])
+  category   Category?   @relation(fields: [categoryId], references: [id])
+  tags       BlogTag[]
+  comments   Comment[]
+  savedBy    SavedBlog[]
+
+  @@index([status, publishedAt])
+  @@index([categoryId])
+}
+
+model BlogTag {
+  blogId String
+  tagId  String
+  blog   Blog   @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([blogId, tagId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  approved  Boolean  @default(false)
+  blogId    String
+  userId    String
+  createdAt DateTime @default(now())
+  blog      Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([blogId])
+}
+
+model SavedBlog {
+  id        String   @id @default(cuid())
+  userId    String
+  blogId    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  blog      Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, blogId])
+}
+
+model Service {
+  id          String           @id @default(cuid())
+  name        String
+  slug        String           @unique
+  description String
+  icon        String?
+  features    Json
+  order       Int              @default(0)
+  active      Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  pricing     ServicePricing[]
+  faqs        ServiceFAQ[]
+  leads       Lead[]
+  bookings    Booking[]
+}
+
+model ServicePricing {
+  id        String  @id @default(cuid())
+  serviceId String
+  tier      String
+  price     Float
+  currency  String  @default("USD")
+  features  Json
+  popular   Boolean @default(false)
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+}
+
+model ServiceFAQ {
+  id        String @id @default(cuid())
+  serviceId String
+  question  String
+  answer    String
+  order     Int    @default(0)
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+}
+
+model Lead {
+  id        String     @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  company   String?
+  message   String?
+  source    String     @default("website")
+  status    LeadStatus @default(NEW)
+  serviceId String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  service   Service?   @relation(fields: [serviceId], references: [id])
+
+  @@index([status])
+  @@index([email])
+}
+
+model Project {
+  id           String             @id @default(cuid())
+  title        String
+  description  String?
+  status       ProjectStatus      @default(PENDING)
+  progress     Int                @default(0)
+  technologies Json?
+  results      Json?
+  clientId     String
+  startDate    DateTime?
+  endDate      DateTime?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  client       User               @relation("ClientProjects", fields: [clientId], references: [id])
+  deliverables ProjectDeliverable[]
+  invoices     Invoice[]
+}
+
+model ProjectDeliverable {
+  id         String   @id @default(cuid())
+  projectId  String
+  title      String
+  fileUrl    String
+  fileType   String?
+  uploadedAt DateTime @default(now())
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Invoice {
+  id        String        @id @default(cuid())
+  projectId String
+  amount    Float
+  currency  String        @default("USD")
+  status    InvoiceStatus @default(DRAFT)
+  dueDate   DateTime?
+  fileUrl   String?
+  createdAt DateTime      @default(now())
+  project   Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Booking {
+  id        String        @id @default(cuid())
+  userId    String?
+  serviceId String?
+  name      String
+  email     String
+  phone     String?
+  datetime  DateTime
+  status    BookingStatus @default(PENDING)
+  notes     String?
+  createdAt DateTime      @default(now())
+  user      User?         @relation(fields: [userId], references: [id])
+  service   Service?      @relation(fields: [serviceId], references: [id])
+}
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  name      String
+  company   String?
+  role      String?
+  quote     String
+  avatar    String?
+  rating    Int      @default(5)
+  featured  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model PortfolioItem {
+  id            String            @id @default(cuid())
+  title         String
+  slug          String            @unique
+  category      PortfolioCategory
+  description   String
+  images        Json
+  technologies  Json
+  results       Json?
+  featured      Boolean           @default(false)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+}
+
+model Media {
+  id         String    @id @default(cuid())
+  url        String
+  publicId   String?
+  type       MediaType
+  filename   String?
+  size       Int?
+  uploadedBy String
+  createdAt  DateTime  @default(now())
+  uploader   User      @relation(fields: [uploadedBy], references: [id])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  read      Boolean          @default(false)
+  type      NotificationType @default(INFO)
+  link      String?
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+}
+
+model SupportTicket {
+  id        String         @id @default(cuid())
+  userId    String
+  subject   String
+  status    TicketStatus   @default(OPEN)
+  priority  TicketPriority @default(MEDIUM)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  TicketMessage[]
+}
+
+model TicketMessage {
+  id        String        @id @default(cuid())
+  ticketId  String
+  senderId  String
+  content   String
+  createdAt DateTime      @default(now())
+  ticket    SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  sender    User          @relation(fields: [senderId], references: [id])
+}
+
+model NewsletterSubscriber {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  subscribedAt DateTime @default(now())
+  active       Boolean  @default(true)
+}
+
+model SiteStat {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+  label String
+}
+
+model TeamMember {
+  id        String  @id @default(cuid())
+  name      String
+  role      String
+  bio       String?
+  avatar    String?
+  linkedin  String?
+  order     Int     @default(0)
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  resource  String
+  metadata  Json?
+  ip        String?
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id])
+}

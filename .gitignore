@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.next/
+.env
+.env.local
+.env.*.local
+*.log
+.DS_Store
+coverage/
+.vercel
+backend/uploads/
+backend-run.log
+frontend.log
+backend.log
+Thumbs.db
