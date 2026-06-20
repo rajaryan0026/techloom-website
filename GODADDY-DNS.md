@@ -26,31 +26,29 @@ Vercel project → **Settings → Environment Variables** (or import `frontend/v
 
 ```
 NEXT_PUBLIC_SITE_URL=https://www.techloom.live
-NEXT_PUBLIC_API_URL=https://asia-south1-YOUR_PROJECT.cloudfunctions.net/api/api
-INTERNAL_API_URL=https://asia-south1-YOUR_PROJECT.cloudfunctions.net/api/api
+NEXT_PUBLIC_API_URL=https://asia-south1-techloom-48db5.cloudfunctions.net/api/api
+INTERNAL_API_URL=https://asia-south1-techloom-48db5.cloudfunctions.net/api/api
 NEXT_PUBLIC_WHATSAPP_NUMBER=919709991060
 NEXT_PUBLIC_PHONE=+919709991060
 NEXT_PUBLIC_INSTAGRAM=techloom00
 ```
 
-Replace `YOUR_PROJECT` with your Firebase project id (e.g. `techloom-live`).
-
 Redeploy Vercel after any env change.
 
 ## 4. Firebase API
 
-API runs on Firebase Cloud Functions — see **[FIREBASE-DEPLOY.md](./FIREBASE-DEPLOY.md)**.
+Firebase project: **`techloom-48db5`** — see **[FIREBASE-DEPLOY.md](./FIREBASE-DEPLOY.md)**.
 
-Default API URL pattern:
+API base URL:
 
 ```
-https://asia-south1-techloom-live.cloudfunctions.net/api
+https://asia-south1-techloom-48db5.cloudfunctions.net/api
 ```
 
 Health check:
 
 ```
-https://asia-south1-techloom-live.cloudfunctions.net/api/health
+https://asia-south1-techloom-48db5.cloudfunctions.net/api/health
 ```
 
 ## 5. Optional: API subdomain

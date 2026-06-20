@@ -36,7 +36,7 @@ Admin login after seed: `admin@techloom.com` + your `ADMIN_PASSWORD`.
 
 ## Step 2 — Firebase project
 
-1. [console.firebase.google.com](https://console.firebase.google.com) → **Add project** → e.g. `techloom-live`
+1. Firebase project: **`techloom-48db5`** — [console.firebase.google.com](https://console.firebase.google.com/project/techloom-48db5)
 2. Upgrade to **Blaze (pay-as-you-go)** — required for Cloud Functions outbound network (Resend, Neon). You stay in free tier limits for low traffic.
 3. Install Firebase CLI:
 
@@ -49,7 +49,7 @@ firebase login
 
 ```powershell
 cd C:\Users\rajar\projects\techloom
-firebase use techloom-live
+firebase use techloom-48db5
 ```
 
 ---
@@ -95,14 +95,14 @@ firebase deploy --only functions
 After deploy, note your API base URL from the CLI output:
 
 ```
-https://asia-south1-techloom-live.cloudfunctions.net/api
+https://asia-south1-techloom-48db5.cloudfunctions.net/api
 ```
 
 Your frontend should use:
 
 ```
-NEXT_PUBLIC_API_URL=https://asia-south1-techloom-live.cloudfunctions.net/api/api
-INTERNAL_API_URL=https://asia-south1-techloom-live.cloudfunctions.net/api/api
+NEXT_PUBLIC_API_URL=https://asia-south1-techloom-48db5.cloudfunctions.net/api/api
+INTERNAL_API_URL=https://asia-south1-techloom-48db5.cloudfunctions.net/api/api
 ```
 
 > Function name is `api`, Express routes start with `/api` — so the URL has `/api/api`.
@@ -116,8 +116,8 @@ Set `API_PUBLIC_URL` in `functions/.env` to the function URL (without trailing `
 Vercel → project → **Settings → Environment Variables**:
 
 ```
-NEXT_PUBLIC_API_URL=https://asia-south1-YOUR_PROJECT.cloudfunctions.net/api/api
-INTERNAL_API_URL=https://asia-south1-YOUR_PROJECT.cloudfunctions.net/api/api
+NEXT_PUBLIC_API_URL=https://asia-south1-techloom-48db5.cloudfunctions.net/api/api
+INTERNAL_API_URL=https://asia-south1-techloom-48db5.cloudfunctions.net/api/api
 ```
 
 Redeploy Vercel.
@@ -127,8 +127,8 @@ Redeploy Vercel.
 ## Step 6 — Verify
 
 ```text
-https://asia-south1-YOUR_PROJECT.cloudfunctions.net/api/health
-https://asia-south1-YOUR_PROJECT.cloudfunctions.net/api/api/services
+https://asia-south1-techloom-48db5.cloudfunctions.net/api/health
+https://asia-south1-techloom-48db5.cloudfunctions.net/api/api/services
 ```
 
 - https://www.techloom.live — homepage

@@ -52,14 +52,14 @@ See **[FIREBASE-DEPLOY.md](./FIREBASE-DEPLOY.md)** for full API deploy steps.
 .\deploy-firebase.ps1
 
 # 3. Vercel — set NEXT_PUBLIC_API_URL to your Firebase function URL
-#    https://asia-south1-PROJECT.cloudfunctions.net/api/api
+#    https://asia-south1-techloom-48db5.cloudfunctions.net/api/api
 ```
 
 ### Vercel env vars
 
 | Variable | Value |
 |----------|-------|
-| `NEXT_PUBLIC_API_URL` | `https://asia-south1-PROJECT.cloudfunctions.net/api/api` |
+| `NEXT_PUBLIC_API_URL` | `https://asia-south1-techloom-48db5.cloudfunctions.net/api/api` |
 | `INTERNAL_API_URL` | same as above |
 | `NEXT_PUBLIC_SITE_URL` | `https://www.techloom.live` |
 | `NEXT_PUBLIC_WHATSAPP_NUMBER` | `919709991060` |

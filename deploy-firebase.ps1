@@ -41,7 +41,7 @@ try {
     Write-Host ""
     Write-Host "  Deploy complete!" -ForegroundColor Green
     Write-Host "  Update Vercel NEXT_PUBLIC_API_URL to:"
-    Write-Host "  https://asia-south1-YOUR_PROJECT.cloudfunctions.net/api/api"
+    Write-Host "  https://asia-south1-techloom-48db5.cloudfunctions.net/api/api"
     Write-Host ""
 } finally {
     Pop-Location
