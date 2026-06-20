@@ -1,5 +1,19 @@
 # Deploy Techloom API on Render
 
+## Important — Render Build Command
+
+If you created the service manually, set this in **techloom-api → Settings → Build & Deploy**:
+
+| Field | Value |
+|-------|-------|
+| **Root Directory** | `backend` |
+| **Build Command** | `npm install && npm run build` |
+| **Start Command** | `npx prisma db push && npm start` |
+
+Save, then **Manual Deploy → Deploy latest commit**.
+
+---
+
 ## Step 1 — Create Blueprint
 
 1. Go to [render.com/dashboard](https://dashboard.render.com)
