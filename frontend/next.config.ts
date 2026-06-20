@@ -13,15 +13,20 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['lucide-react', 'framer-motion'],
   },
   async rewrites() {
-    if (process.env.NODE_ENV === 'development') {
-      return [
-        {
-          source: '/api/:path*',
-          destination: 'http://localhost:4000/api/:path*',
-        },
-      ];
+    const apiBase =
+      process.env.INTERNAL_API_URL ||
+      process.env.NEXT_PUBLIC_API_URL ||
+      (process.env.NODE_ENV === 'development' ? 'http://localhost:4000/api' : '');
+
+    if (!apiBase || apiBase.startsWith('/')) {
+      if (process.env.NODE_ENV === 'development') {
+        return [{ source: '/api/:path*', destination: 'http://localhost:4000/api/:path*' }];
+      }
+      return [];
     }
-    return [];
+
+    const origin = apiBase.replace(/\/api\/?$/, '');
+    return [{ source: '/api/:path*', destination: `${origin}/api/:path*` }];
   },
 };
 
