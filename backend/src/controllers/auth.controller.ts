@@ -6,6 +6,7 @@ import { AuthRequest } from '../middleware/auth';
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../utils/jwt';
 import { sendEmail, verificationEmailHtml, resetPasswordEmailHtml } from '../services/email.service';
 import { AppError, NotFoundError } from '../utils/errors';
+import { getParam } from '../utils/params';
 
 const frontendUrl = () => process.env.FRONTEND_URL || 'http://localhost:3000';
 
@@ -200,7 +201,7 @@ export async function resetPassword(req: AuthRequest, res: Response, next: NextF
 
 export async function verifyEmail(req: AuthRequest, res: Response, next: NextFunction) {
   try {
-    const { token } = req.params;
+    const token = getParam(req, 'token');
     const emailToken = await prisma.emailToken.findUnique({ where: { token } });
     if (!emailToken || emailToken.used || emailToken.expiresAt < new Date() || emailToken.type !== 'verify') {
       throw new AppError(400, 'Invalid or expired verification token');

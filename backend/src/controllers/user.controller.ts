@@ -4,6 +4,7 @@ import { prisma } from '../utils/prisma';
 import { AuthRequest } from '../middleware/auth';
 import { NotFoundError, AppError } from '../utils/errors';
 import { uploadFile } from '../services/upload.service';
+import { getParam } from '../utils/params';
 
 export async function getProfile(req: AuthRequest, res: Response, next: NextFunction) {
   try {
@@ -78,7 +79,7 @@ export async function getMyProjects(req: AuthRequest, res: Response, next: NextF
 export async function getMyProject(req: AuthRequest, res: Response, next: NextFunction) {
   try {
     const project = await prisma.project.findFirst({
-      where: { id: req.params.id, clientId: req.user!.userId },
+      where: { id: getParam(req, 'id'), clientId: req.user!.userId },
       include: { deliverables: true, invoices: true },
     });
     if (!project) throw new NotFoundError();
@@ -116,7 +117,7 @@ export async function getSavedBlogs(req: AuthRequest, res: Response, next: NextF
 export async function saveBlog(req: AuthRequest, res: Response, next: NextFunction) {
   try {
     const saved = await prisma.savedBlog.create({
-      data: { userId: req.user!.userId, blogId: req.params.blogId },
+      data: { userId: req.user!.userId, blogId: getParam(req, 'blogId') },
     });
     res.status(201).json({ success: true, data: saved });
   } catch (err) {
@@ -127,7 +128,7 @@ export async function saveBlog(req: AuthRequest, res: Response, next: NextFuncti
 export async function unsaveBlog(req: AuthRequest, res: Response, next: NextFunction) {
   try {
     await prisma.savedBlog.deleteMany({
-      where: { userId: req.user!.userId, blogId: req.params.blogId },
+      where: { userId: req.user!.userId, blogId: getParam(req, 'blogId') },
     });
     res.json({ success: true, message: 'Removed from saved' });
   } catch (err) {
@@ -151,7 +152,7 @@ export async function getNotifications(req: AuthRequest, res: Response, next: Ne
 export async function markNotificationRead(req: AuthRequest, res: Response, next: NextFunction) {
   try {
     await prisma.notification.updateMany({
-      where: { id: req.params.id, userId: req.user!.userId },
+      where: { id: getParam(req, 'id'), userId: req.user!.userId },
       data: { read: true },
     });
     res.json({ success: true });
@@ -194,7 +195,7 @@ export async function createSupportTicket(req: AuthRequest, res: Response, next:
 export async function addTicketMessage(req: AuthRequest, res: Response, next: NextFunction) {
   try {
     const ticket = await prisma.supportTicket.findFirst({
-      where: { id: req.params.id, userId: req.user!.userId },
+      where: { id: getParam(req, 'id'), userId: req.user!.userId },
     });
     if (!ticket) throw new NotFoundError();
 

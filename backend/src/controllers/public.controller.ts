@@ -5,6 +5,7 @@ import { AuthRequest } from '../middleware/auth';
 import { NotFoundError } from '../utils/errors';
 import { sendContactEmails } from '../services/email.service';
 import { sendWhatsAppNotification } from '../services/whatsapp.service';
+import { getParam } from '../utils/params';
 
 export async function getServices(_req: AuthRequest, res: Response, next: NextFunction) {
   try {
@@ -22,7 +23,7 @@ export async function getServices(_req: AuthRequest, res: Response, next: NextFu
 export async function getServiceBySlug(req: AuthRequest, res: Response, next: NextFunction) {
   try {
     const service = await prisma.service.findUnique({
-      where: { slug: req.params.slug },
+      where: { slug: getParam(req, 'slug') },
       include: { pricing: true, faqs: { orderBy: { order: 'asc' } } },
     });
     if (!service) throw new NotFoundError('Service not found');
@@ -47,7 +48,7 @@ export async function getPortfolio(req: AuthRequest, res: Response, next: NextFu
 
 export async function getPortfolioBySlug(req: AuthRequest, res: Response, next: NextFunction) {
   try {
-    const item = await prisma.portfolioItem.findUnique({ where: { slug: req.params.slug } });
+    const item = await prisma.portfolioItem.findUnique({ where: { slug: getParam(req, 'slug') } });
     if (!item) throw new NotFoundError('Portfolio item not found');
     res.json({ success: true, data: item });
   } catch (err) {
@@ -98,7 +99,7 @@ export async function getBlogs(req: AuthRequest, res: Response, next: NextFuncti
 export async function getBlogBySlug(req: AuthRequest, res: Response, next: NextFunction) {
   try {
     const blog = await prisma.blog.findUnique({
-      where: { slug: req.params.slug },
+      where: { slug: getParam(req, 'slug') },
       include: {
         author: { select: { id: true, name: true, avatar: true, email: true } },
         category: true,
@@ -121,7 +122,7 @@ export async function getBlogBySlug(req: AuthRequest, res: Response, next: NextF
 
 export async function getRelatedBlogs(req: AuthRequest, res: Response, next: NextFunction) {
   try {
-    const blog = await prisma.blog.findUnique({ where: { slug: req.params.slug } });
+    const blog = await prisma.blog.findUnique({ where: { slug: getParam(req, 'slug') } });
     if (!blog) throw new NotFoundError();
 
     const related = await prisma.blog.findMany({
@@ -145,7 +146,7 @@ export async function getRelatedBlogs(req: AuthRequest, res: Response, next: Nex
 
 export async function createComment(req: AuthRequest, res: Response, next: NextFunction) {
   try {
-    const blog = await prisma.blog.findUnique({ where: { slug: req.params.slug } });
+    const blog = await prisma.blog.findUnique({ where: { slug: getParam(req, 'slug') } });
     if (!blog) throw new NotFoundError('Blog not found');
     if (!req.user) throw new NotFoundError('Login required to comment');
 

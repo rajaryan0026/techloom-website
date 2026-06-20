@@ -6,6 +6,7 @@ import { NotFoundError } from '../utils/errors';
 import { slugify } from '../utils/slugify';
 import { uploadFile } from '../services/upload.service';
 import { logAudit } from '../services/audit.service';
+import { getParam } from '../utils/params';
 
 export async function getAnalytics(_req: AuthRequest, res: Response, next: NextFunction) {
   try {
@@ -54,7 +55,7 @@ export async function getLeads(req: AuthRequest, res: Response, next: NextFuncti
 export async function updateLead(req: AuthRequest, res: Response, next: NextFunction) {
   try {
     const lead = await prisma.lead.update({
-      where: { id: req.params.id },
+      where: { id: getParam(req, 'id') },
       data: req.body,
     });
     await logAudit(req.user?.userId, 'UPDATE', 'lead', { id: lead.id }, req.ip);
@@ -116,7 +117,7 @@ export async function updateBlog(req: AuthRequest, res: Response, next: NextFunc
     if (title) data.title = title;
     if (status === BlogStatus.PUBLISHED) data.publishedAt = new Date();
 
-    const blog = await prisma.blog.update({ where: { id: req.params.id }, data });
+    const blog = await prisma.blog.update({ where: { id: getParam(req, 'id') }, data });
     await logAudit(req.user?.userId, 'UPDATE', 'blog', { id: blog.id }, req.ip);
     res.json({ success: true, data: blog });
   } catch (err) {
@@ -126,8 +127,8 @@ export async function updateBlog(req: AuthRequest, res: Response, next: NextFunc
 
 export async function deleteBlog(req: AuthRequest, res: Response, next: NextFunction) {
   try {
-    await prisma.blog.delete({ where: { id: req.params.id } });
-    await logAudit(req.user?.userId, 'DELETE', 'blog', { id: req.params.id }, req.ip);
+    await prisma.blog.delete({ where: { id: getParam(req, 'id') } });
+    await logAudit(req.user?.userId, 'DELETE', 'blog', { id: getParam(req, 'id') }, req.ip);
     res.json({ success: true, message: 'Blog deleted' });
   } catch (err) {
     next(err);
@@ -158,7 +159,7 @@ export async function createProject(req: AuthRequest, res: Response, next: NextF
 
 export async function updateProject(req: AuthRequest, res: Response, next: NextFunction) {
   try {
-    const project = await prisma.project.update({ where: { id: req.params.id }, data: req.body });
+    const project = await prisma.project.update({ where: { id: getParam(req, 'id') }, data: req.body });
     res.json({ success: true, data: project });
   } catch (err) {
     next(err);
@@ -170,7 +171,7 @@ export async function uploadDeliverable(req: AuthRequest, res: Response, next: N
     if (!req.file) throw new NotFoundError('No file');
     const uploaded = await uploadFile(req.file.buffer, req.file.originalname, req.file.mimetype);
     const deliverable = await prisma.projectDeliverable.create({
-      data: { projectId: req.params.id, title: req.body.title || req.file.originalname, fileUrl: uploaded.url, fileType: req.file.mimetype },
+      data: { projectId: getParam(req, 'id'), title: req.body.title || req.file.originalname, fileUrl: uploaded.url, fileType: req.file.mimetype },
     });
     res.status(201).json({ success: true, data: deliverable });
   } catch (err) {
@@ -244,7 +245,7 @@ export async function createTestimonial(req: AuthRequest, res: Response, next: N
 export async function updateTestimonial(req: AuthRequest, res: Response, next: NextFunction) {
   try {
     const testimonial = await prisma.testimonial.update({
-      where: { id: req.params.id },
+      where: { id: getParam(req, 'id') },
       data: req.body,
     });
     await logAudit(req.user?.userId, 'UPDATE', 'testimonial', { id: testimonial.id }, req.ip);
@@ -256,8 +257,8 @@ export async function updateTestimonial(req: AuthRequest, res: Response, next: N
 
 export async function deleteTestimonial(req: AuthRequest, res: Response, next: NextFunction) {
   try {
-    await prisma.testimonial.delete({ where: { id: req.params.id } });
-    await logAudit(req.user?.userId, 'DELETE', 'testimonial', { id: req.params.id }, req.ip);
+    await prisma.testimonial.delete({ where: { id: getParam(req, 'id') } });
+    await logAudit(req.user?.userId, 'DELETE', 'testimonial', { id: getParam(req, 'id') }, req.ip);
     res.json({ success: true, message: 'Testimonial deleted' });
   } catch (err) {
     next(err);
@@ -286,7 +287,7 @@ export async function createTeamMember(req: AuthRequest, res: Response, next: Ne
 export async function updateTeamMember(req: AuthRequest, res: Response, next: NextFunction) {
   try {
     const member = await prisma.teamMember.update({
-      where: { id: req.params.id },
+      where: { id: getParam(req, 'id') },
       data: req.body,
     });
     await logAudit(req.user?.userId, 'UPDATE', 'teamMember', { id: member.id }, req.ip);
@@ -298,8 +299,8 @@ export async function updateTeamMember(req: AuthRequest, res: Response, next: Ne
 
 export async function deleteTeamMember(req: AuthRequest, res: Response, next: NextFunction) {
   try {
-    await prisma.teamMember.delete({ where: { id: req.params.id } });
-    await logAudit(req.user?.userId, 'DELETE', 'teamMember', { id: req.params.id }, req.ip);
+    await prisma.teamMember.delete({ where: { id: getParam(req, 'id') } });
+    await logAudit(req.user?.userId, 'DELETE', 'teamMember', { id: getParam(req, 'id') }, req.ip);
     res.json({ success: true, message: 'Team member deleted' });
   } catch (err) {
     next(err);
@@ -336,7 +337,7 @@ export async function updatePortfolioItem(req: AuthRequest, res: Response, next:
     }
 
     const item = await prisma.portfolioItem.update({
-      where: { id: req.params.id },
+      where: { id: getParam(req, 'id') },
       data,
     });
     await logAudit(req.user?.userId, 'UPDATE', 'portfolio', { id: item.id }, req.ip);
@@ -348,8 +349,8 @@ export async function updatePortfolioItem(req: AuthRequest, res: Response, next:
 
 export async function deletePortfolioItem(req: AuthRequest, res: Response, next: NextFunction) {
   try {
-    await prisma.portfolioItem.delete({ where: { id: req.params.id } });
-    await logAudit(req.user?.userId, 'DELETE', 'portfolio', { id: req.params.id }, req.ip);
+    await prisma.portfolioItem.delete({ where: { id: getParam(req, 'id') } });
+    await logAudit(req.user?.userId, 'DELETE', 'portfolio', { id: getParam(req, 'id') }, req.ip);
     res.json({ success: true, message: 'Portfolio item deleted' });
   } catch (err) {
     next(err);
