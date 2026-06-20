@@ -77,7 +77,8 @@ async function verifyResendConnection() {
 
     if (error) {
       // Send-only keys cannot list domains but can still send mail.
-      if (error.name === 'restricted_api_key') {
+      const errorCode = (error as { name?: string }).name ?? '';
+      if (errorCode === 'restricted_api_key' || error.message.includes('restricted to only send')) {
         return { ok: true, reason: null, sendOnlyKey: true };
       }
       return { ok: false, reason: error.message || 'Invalid RESEND_API_KEY' };
