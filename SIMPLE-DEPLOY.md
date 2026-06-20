@@ -19,18 +19,23 @@ Email uses **Resend** (already set up). No Firebase, no Neon, no separate databa
    - **Root Directory** → `backend`
    - **Start Command** → `npx prisma db push && npm run db:seed && npm start`
 4. In the same project: **+ New** → **Database** → **PostgreSQL**
-5. Click the **Postgres** service → **Variables** → copy `DATABASE_URL`
-6. Click the **backend** service → **Variables** → **RAW Editor** → paste from `backend/railway.env.import` and fill in:
+5. **Link database to backend** (this fixes `DATABASE_URL not found`):
+   - Click the **backend** service (not Postgres)
+   - **Variables** tab → **+ New Variable** → **Add Reference**
+   - Service: **Postgres** (your database) → Variable: **DATABASE_URL**
+   - Save
+6. Still on **backend** → **Variables** → **RAW Editor** → paste from `backend/railway.env.import` and fill in:
 
 | Variable | What to put |
 |----------|-------------|
-| `DATABASE_URL` | Paste from Postgres service (Railway may auto-link — check first) |
 | `RESEND_API_KEY` | Your Resend key |
 | `ADMIN_PASSWORD` | Password for admin login |
 | `JWT_SECRET` | Any random 32+ character string |
 | `JWT_REFRESH_SECRET` | Another random 32+ character string |
 
-7. **Deploy** → wait until **Active**
+> Do **not** skip step 5 — without the Postgres reference, deploy fails with `Environment variable not found: DATABASE_URL`.
+
+7. **Redeploy** the backend service → wait until **Active**
 8. **Settings → Networking → Generate Domain** → copy URL, e.g. `https://techloom-api-production.up.railway.app`
 
 **Test:** open `https://YOUR-RAILWAY-URL.up.railway.app/health` → should show `"status":"ok"`
