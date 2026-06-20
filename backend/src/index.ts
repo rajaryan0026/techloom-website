@@ -10,7 +10,7 @@ app.listen(PORT, async () => {
 
   if (!isEmailConfigured()) {
     console.warn('[Email] Not configured — contact form saves messages but will NOT send email.');
-    console.warn('[Email] Production: set RESEND_API_KEY in Firebase functions/.env. Local: run .\\setup-email.ps1');
+    console.warn('[Email] Production: set RESEND_API_KEY on Railway. Local: run .\\setup-email.ps1');
   } else {
     const provider = getEmailProvider();
     const check = await verifyEmailConnection();
