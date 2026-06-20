@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { prisma } from '../utils/prisma';
 
 export async function logAudit(
@@ -12,7 +13,7 @@ export async function logAudit(
       userId,
       action,
       resource,
-      metadata: metadata || {},
+      metadata: (metadata ?? {}) as Prisma.InputJsonValue,
       ip,
     },
   });
