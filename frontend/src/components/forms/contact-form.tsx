@@ -33,13 +33,15 @@ export function ContactForm({ services = [] }: { services?: Service[] }) {
     if (form.serviceId) payload.serviceId = form.serviceId;
 
     try {
-      const { data } = await api.post('/contact', payload);
+      const { data } = await api.post('/contact', payload, { timeout: 120000 });
       setEmailSent(data.emailSent !== false);
       setSuccess(true);
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        if (!err.response) {
-          setError('Cannot reach our server. Please try again in a moment or contact us on WhatsApp.');
+        if (err.code === 'ECONNABORTED') {
+          setError('Server is waking up — this can take up to 2 minutes on first try. Please wait and submit again, or message us on WhatsApp.');
+        } else if (!err.response) {
+          setError('Cannot reach our server. Wait 30 seconds and try again, or contact us on WhatsApp.');
         } else if (err.response.data?.errors) {
           const msgs = Object.values(err.response.data.errors).flat().filter(Boolean);
           setError(msgs.join(', ') || 'Please check the form fields and try again.');
@@ -100,7 +102,7 @@ export function ContactForm({ services = [] }: { services?: Service[] }) {
       <Textarea placeholder="Your message *" required rows={5} minLength={10} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} />
       {error && <p className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">{error}</p>}
       <Button type="submit" className="w-full" size="lg" disabled={loading}>
-        {loading ? 'Sending...' : (
+        {loading ? 'Sending… (may take up to 60s)' : (
           <>
             Send Message
             <Send className="h-4 w-4" />
