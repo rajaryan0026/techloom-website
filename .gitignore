@@ -13,3 +13,6 @@ backend-run.log
 frontend.log
 backend.log
 Thumbs.db
+.firebase/
+functions/.env
+functions/lib/

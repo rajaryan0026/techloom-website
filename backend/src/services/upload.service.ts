@@ -78,7 +78,7 @@ export async function uploadFile(
   fs.writeFileSync(path.join(localUploadsDir, key), buffer);
   const baseUrl =
     process.env.API_PUBLIC_URL ||
-    process.env.RENDER_EXTERNAL_URL ||
+    process.env.FIREBASE_FUNCTION_URL ||
     `http://localhost:${process.env.PORT || 4000}`;
   return {
     url: `${baseUrl}/uploads/${key}`,

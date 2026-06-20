@@ -4,7 +4,6 @@
 
 1. [vercel.com](https://vercel.com) → your project → **Settings → Domains**
 2. Add **`techloom.live`** and **`www.techloom.live`**
-3. Vercel may ask you to verify — use the records below
 
 ## 2. GoDaddy DNS records
 
@@ -21,49 +20,42 @@ Go to [GoDaddy Domain Portfolio](https://dcc.godaddy.com/) → **techloom.live**
 
 Save. Propagation: 10 minutes – 48 hours (usually under 1 hour).
 
-## 3. Vercel — Import .env
+## 3. Vercel — Environment variables
 
-When importing the GitHub repo on Vercel:
-
-1. Set **Root Directory** → `frontend`
-2. Click **Environment Variables** → **Import .env**
-3. Upload or paste from `frontend/vercel.env.import`:
+Vercel project → **Settings → Environment Variables** (or import `frontend/vercel.env.import`):
 
 ```
 NEXT_PUBLIC_SITE_URL=https://www.techloom.live
-NEXT_PUBLIC_API_URL=https://techloom-api.onrender.com/api
-INTERNAL_API_URL=https://techloom-api.onrender.com/api
-```
-
-> Use the **direct Render URL** (not `/api`). Vercel proxy can timeout when Render free tier wakes from sleep.
+NEXT_PUBLIC_API_URL=https://asia-south1-YOUR_PROJECT.cloudfunctions.net/api/api
+INTERNAL_API_URL=https://asia-south1-YOUR_PROJECT.cloudfunctions.net/api/api
 NEXT_PUBLIC_WHATSAPP_NUMBER=919709991060
 NEXT_PUBLIC_PHONE=+919709991060
 NEXT_PUBLIC_INSTAGRAM=techloom00
 ```
 
-4. Deploy
+Replace `YOUR_PROJECT` with your Firebase project id (e.g. `techloom-live`).
 
-> After Render API is live, update `NEXT_PUBLIC_API_URL` if your API URL is different.
+Redeploy Vercel after any env change.
 
-Redeploy after any env change.
+## 4. Firebase API
 
-## 4. Render — Import .env (API)
+API runs on Firebase Cloud Functions — see **[FIREBASE-DEPLOY.md](./FIREBASE-DEPLOY.md)**.
 
-On **techloom-api** → **Environment** → **Import from .env**:
+Default API URL pattern:
 
-Use `backend/render.env.import` — **edit `SMTP_PASS` and `ADMIN_PASSWORD` first**, then import.
+```
+https://asia-south1-techloom-live.cloudfunctions.net/api
+```
 
-`DATABASE_URL`, `JWT_SECRET`, and `JWT_REFRESH_SECRET` are created automatically by `render.yaml` — do not overwrite those.
+Health check:
+
+```
+https://asia-south1-techloom-live.cloudfunctions.net/api/health
+```
 
 ## 5. Optional: API subdomain
 
-Render → **techloom-api** → **Settings → Custom Domains** → add `api.techloom.live`
-
-GoDaddy DNS:
-
-| Type  | Name | Value (from Render)   |
-|-------|------|------------------------|
-| CNAME | api  | `techloom-api.onrender.com` |
+To use `api.techloom.live`, connect it in Firebase Hosting custom domains or add a GoDaddy CNAME per Firebase instructions.
 
 Then update Vercel:
 

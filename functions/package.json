@@ -1,0 +1,22 @@
+{
+  "name": "techloom-functions",
+  "version": "1.0.0",
+  "private": true,
+  "main": "lib/index.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^6.3.2",
+    "techloom-api": "file:../backend"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
