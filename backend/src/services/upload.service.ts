@@ -76,7 +76,10 @@ export async function uploadFile(
   const safeName = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
   const key = `${uuidv4()}-${safeName}`;
   fs.writeFileSync(path.join(localUploadsDir, key), buffer);
-  const baseUrl = process.env.API_PUBLIC_URL || `http://localhost:${process.env.PORT || 4000}`;
+  const baseUrl =
+    process.env.API_PUBLIC_URL ||
+    process.env.RENDER_EXTERNAL_URL ||
+    `http://localhost:${process.env.PORT || 4000}`;
   return {
     url: `${baseUrl}/uploads/${key}`,
     publicId: key,

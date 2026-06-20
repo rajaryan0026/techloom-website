@@ -32,8 +32,10 @@ services:
       - key: JWT_REFRESH_EXPIRES
         value: 7d
       - key: FRONTEND_URL
-        sync: false
+        value: https://www.techloom.live
       - key: CORS_ORIGIN
+        value: https://www.techloom.live,https://techloom.live
+      - key: API_PUBLIC_URL
         sync: false
       - key: SMTP_HOST
         value: smtp.gmail.com
